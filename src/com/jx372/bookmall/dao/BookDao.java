@@ -205,16 +205,11 @@ public class BookDao {
 		try {
 			conn = getConnection();
 
-			// 3.statement 준비
-			String sql = "delete from book where b_no=?";
+			String sql = "delete from book where b_no="+no;
 
-			pstmt = conn.prepareStatement(sql); // import할때 java.sql로 해워쟈 됨
+			pstmt = conn.prepareStatement(sql); 
 
-			// 4. 바인딩
-			pstmt.setLong(1, no);
-
-			// 4.sql문 실행
-			int count = pstmt.executeUpdate(); // 업데이트한 갯수가 나옴
+			int count = pstmt.executeUpdate(); 
 
 			return (count == 1);
 
@@ -239,7 +234,7 @@ public class BookDao {
 		}
 	}
 
-	public boolean update(BookVo bookVo) {
+	public boolean update(BookVo bookVo, Long no) {
 
 		Connection conn = null;
 		PreparedStatement pstmt = null;
@@ -247,17 +242,16 @@ public class BookDao {
 		try {
 			conn = getConnection();
 
-			String sql = "update member set "
+			String sql = "update book set "
 					+ " title=?,price=?,c_no=? "
-					+ " where b_no=?";
+					+ " where b_no="+no;
 
 			pstmt = conn.prepareStatement(sql); // import할때 java.sql로 해워쟈 됨
 
 			pstmt.setString(1, bookVo.getB_title());
 			pstmt.setInt(2, bookVo.getB_price());
 			pstmt.setLong(3, bookVo.getC_no());
-			pstmt.setLong(4, bookVo.getB_no());
-
+			
 			int count = pstmt.executeUpdate(); // 업데이트한 갯수가 나옴
 
 			return (count == 1);

@@ -10,6 +10,10 @@ public class MemberDaoTest {
 		
 		//insertTest();
 		selectTest();
+		updateTest(3L, "정예린33", "255", "cadi@hanmail.net", "1234");
+		selectTest(3L);
+		deleteTest(2L);
+		selectTest();
 	}
 	
 	public static void insertTest() {
@@ -32,20 +36,24 @@ public class MemberDaoTest {
 
 	public static void selectTest(Long no) {
 		MemberVo vo = new MemberDao().get(no);
+		
 
-		System.out.println(vo);
+		System.out.println("선택하여 확인 : "+vo);
 	}
 
 	public static void deleteTest(Long no) {
 		new MemberDao().delete(no);
+		System.out.println(no+"번 째 회원을 지웠습니다.");
 	}
 
-	public static void updateTest(Long no) {
+	public static void updateTest(Long no, String name,String phone,String email,String pw) {
 
 		MemberVo vo = new MemberVo();
-
-
-		new MemberDao().update(vo);
+		vo.setName(name);
+		vo.setPhone(phone);
+		vo.setEmail(email);
+		vo.setPw(pw);
+		new MemberDao().update(vo,no);
 
 	}
 }

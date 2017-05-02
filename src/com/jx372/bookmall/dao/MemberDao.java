@@ -208,15 +208,10 @@ public class MemberDao {
 			conn = getConnection();
 
 			// 3.statement 준비
-			String sql = "delete from member where m_no=?";
+			String sql = "delete from member where m_no="+no;
 
-			pstmt = conn.prepareStatement(sql); // import할때 java.sql로 해워쟈 됨
-
-			// 4. 바인딩
-			pstmt.setLong(1, no);
-
-			// 4.sql문 실행
-			int count = pstmt.executeUpdate(); // 업데이트한 갯수가 나옴
+			pstmt = conn.prepareStatement(sql); 
+			int count = pstmt.executeUpdate(); 
 
 			return (count == 1);
 
@@ -241,7 +236,7 @@ public class MemberDao {
 		}
 	}
 
-	public boolean update(MemberVo memberVo) {
+	public boolean update(MemberVo memberVo, Long no) {
 
 		Connection conn = null;
 		PreparedStatement pstmt = null;
@@ -249,7 +244,7 @@ public class MemberDao {
 		try {
 			conn = getConnection();
 
-			String sql = "update member set name=?,phone=?,email=?,pw=? where m_no=?";
+			String sql = "update member set name=?,phone=?,email=?,pw=password(?) where m_no="+no;
 
 			pstmt = conn.prepareStatement(sql); // import할때 java.sql로 해워쟈 됨
 
@@ -257,7 +252,6 @@ public class MemberDao {
 			pstmt.setString(2, memberVo.getPhone());
 			pstmt.setString(3, memberVo.getEmail());
 			pstmt.setString(4, memberVo.getPw());
-			pstmt.setLong(5, memberVo.getNo());
 
 			int count = pstmt.executeUpdate(); // 업데이트한 갯수가 나옴
 

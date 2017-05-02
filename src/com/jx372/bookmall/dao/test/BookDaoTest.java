@@ -16,6 +16,10 @@ public class BookDaoTest {
 		//insertTest("주식알아보기",15000,4L);
 		
 		selectTest();
+		updateTest(7L,"업데이트2",3L, 20000);
+		selectTest(7L);
+	//	deleteTest(5L);
+	//	selectTest();
 
 	}
 	
@@ -38,19 +42,24 @@ public class BookDaoTest {
 	public static void selectTest(Long no) {
 		BookVo vo = new BookDao().get(no);
 
-		System.out.println(vo);
+		System.out.println("선택 하여 출력 : "+vo);
 	}
 
 	public static void deleteTest(Long no) {
 		new BookDao().delete(no);
+		System.out.println(no+"번 서적이 지워졌습니다!");
 	}
 
-	public static void updateTest(Long no) {
+	public static void updateTest(Long no, String title, Long cno,int price) {
 
 		BookVo vo = new BookVo();
+		
+		vo.setB_title(title);
+		vo.setC_no(cno);
+		vo.setB_price(price);
 
 
-		new BookDao().update(vo);
+		new BookDao().update(vo,no);
 
 	}
 
