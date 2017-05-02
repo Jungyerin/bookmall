@@ -9,10 +9,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.jx372.bookmall.vo.OrderVo;
+import com.jx372.bookmall.vo.OrderBookVo;
 
 
-public class OrderDao {
+public class OrderBookDao {
+
 	private Connection getConnection() throws SQLException {
 
 		Connection conn = null;
@@ -31,7 +32,7 @@ public class OrderDao {
 
 	}
 
-	public boolean insert(OrderVo orderVo) {
+	public boolean insert(OrderBookVo orderbookVo) {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 
@@ -39,15 +40,14 @@ public class OrderDao {
 			conn = getConnection();
 
 			// 3.statement 준비
-			String sql = "insert into orders values(?,?,?,?)";
+			String sql = "insert into order_book values(?,?,?)";
 
 			pstmt = conn.prepareStatement(sql); // import할때 java.sql로 해워쟈 됨
 
 			// 4. 바인딩
-			pstmt.setLong(1, orderVo.getO_no());
-			pstmt.setLong(2, orderVo.getM_no());
-			pstmt.setInt(3, orderVo.getPrice());
-			pstmt.setString(4, orderVo.getAddress());
+			pstmt.setLong(1, orderbookVo.getO_no());
+			pstmt.setLong(2, orderbookVo.getB_no());
+			pstmt.setLong(3, orderbookVo.getNumber());
 
 			// 4.sql문 실행
 			int count = pstmt.executeUpdate(); // 업데이트한 갯수가 나옴
@@ -76,8 +76,8 @@ public class OrderDao {
 
 	}
 
-	public List<OrderVo> getList() {
-		List<OrderVo> list = new ArrayList<OrderVo>();
+	public List<OrderBookVo> getList() {
+		List<OrderBookVo> list = new ArrayList<OrderBookVo>();
 
 		Connection conn = null;
 		ResultSet rs = null;
@@ -91,28 +91,28 @@ public class OrderDao {
 											// 좋음
 
 			// 4.sql문 실행
-			String sql = "select o.o_no, m.name,m.email,o.price,o.address "
-						+" from orders o,member m"
-						+" where o.m_no=m.m_no";
+			String sql = "select m.name,ob.o_no,ob.b_no,b.title,ob.number"
+					+ " from order_book ob, book b, orders o,member m" + " where ob.b_no=b.b_no" + " and ob.o_no=o.o_no"
+					+ " and o.m_no=m.m_no";
 			rs = stmt.executeQuery(sql);
 
 			// 5.fetch row(row를 하나씩 가져오기)
 			while (rs.next()) {
-				Long no = rs.getLong(1);
-				String name = rs.getString(2);
-				String email = rs.getString(3);
-				int price=rs.getInt(4);
-				String address = rs.getString(5);
+				String name = rs.getString(1);
+				Long ono = rs.getLong(2);
+				Long bno = rs.getLong(3);
+				String title = rs.getString(4);
+				int number = rs.getInt(5);
 
-				OrderVo orderVo = new OrderVo();
+				OrderBookVo orderbookVo = new OrderBookVo();
 
-				orderVo.setO_no(no);
-				orderVo.setName(name);
-				orderVo.setEmail(email);
-				orderVo.setPrice(price);
-				orderVo.setAddress(address);				
+				orderbookVo.setName(name);
+				orderbookVo.setO_no(ono);
+				orderbookVo.setB_no(bno);
+				orderbookVo.setTitle(title);
+				orderbookVo.setNumber(number);
 
-				list.add(orderVo);
+				list.add(orderbookVo);
 
 			}
 
@@ -142,41 +142,42 @@ public class OrderDao {
 
 	}
 
-	public OrderVo get(Long no) {
+	public OrderBookVo get(Long no) {
 
 		Connection conn = null;
 		ResultSet rs = null;
 		PreparedStatement pstmt = null;
 
-		OrderVo orderVo = null;
+		OrderBookVo orderbookVo = null;
 
 		try {
 			conn = getConnection();
 
-			String sql = "select o.o_no, m.name,m.email,o.price,o.address "
-					+" from orders o,member m"
-					+" where o.m_no=m.m_noo"
-					+" and o.o_no=?";
+			String sql = "select m.name,ob.o_no,ob.b_no,b.title,ob.number"
+					+ " from order_book ob, book b, orders o,member m" 
+					+ " where ob.b_no=b.b_no" 
+					+ " and ob.o_no=o.o_no"
+					+ " and o.m_no=m.m_no" 
+					+ " and o_no=" + no;
 			pstmt = conn.prepareStatement(sql);
 
-			pstmt.setLong(1, no);
 			rs = pstmt.executeQuery();
 
 			if (rs.next()) {
 
-				orderVo = new OrderVo();
-				orderVo.setO_no(rs.getLong(1));
-				orderVo.setName(rs.getString(2));
-				orderVo.setEmail(rs.getString(3));
-				orderVo.setPrice(rs.getInt(4));
-				orderVo.setAddress(rs.getString(5));
+				orderbookVo = new OrderBookVo();
+				orderbookVo.setName(rs.getString(1));
+				orderbookVo.setO_no(rs.getLong(2));
+				orderbookVo.setB_no(rs.getLong(3));
+				orderbookVo.setTitle(rs.getString(4));
+				orderbookVo.setNumber(rs.getInt(5));
 
 			}
 
-			return orderVo;
+			return orderbookVo;
 		} catch (SQLException e) {
 			System.out.println("error" + e);
-			return orderVo;
+			return orderbookVo;
 		} finally {
 			/* 자원정리 */
 			try {
@@ -207,15 +208,19 @@ public class OrderDao {
 			conn = getConnection();
 
 			// 3.statement 준비
-			String sql = "delete from orders where o_no=?";
+			String sql = "delete from order_book "
+						+ " where o_no="+no;
 
-			pstmt = conn.prepareStatement(sql); // import할때 java.sql로 해워쟈 됨
+			pstmt = conn.prepareStatement(sql);
 
 			// 4. 바인딩
-			pstmt.setLong(1, no);
+//			pstmt.setLong(1, ono);
+//			pstmt.setLong(2, bno);
+//			pstmt.setLong(3, number);
 
 			// 4.sql문 실행
-			int count = pstmt.executeUpdate(); // 업데이트한 갯수가 나옴
+			int count = pstmt.executeUpdate();
+			conn.commit();
 
 			return (count == 1);
 
@@ -240,7 +245,7 @@ public class OrderDao {
 		}
 	}
 
-	public boolean update(OrderVo orderVo) {
+	public boolean update(OrderBookVo orderbookVo,Long no) {
 
 		Connection conn = null;
 		PreparedStatement pstmt = null;
@@ -248,15 +253,16 @@ public class OrderDao {
 		try {
 			conn = getConnection();
 
-			String sql = "update orders set "
-					+ " m_no=?,price=?,address=? "
-					+ " where o_no=?";
+			String sql = "update order_book set " 
+					+ " b_no=?,number=? " 
+					+ " where "
+					+ " o_no="+no;
 
-			pstmt = conn.prepareStatement(sql); // import할때 java.sql로 해워쟈 됨
+			pstmt = conn.prepareStatement(sql);
 
-			pstmt.setLong(1, orderVo.getM_no());
-			pstmt.setInt(2, orderVo.getPrice());
-			pstmt.setString(3, orderVo.getAddress());
+			pstmt.setLong(1, orderbookVo.getB_no());
+			pstmt.setInt(2, orderbookVo.getNumber());
+
 
 			int count = pstmt.executeUpdate(); // 업데이트한 갯수가 나옴
 
@@ -282,6 +288,5 @@ public class OrderDao {
 		}
 
 	}
-
 
 }
